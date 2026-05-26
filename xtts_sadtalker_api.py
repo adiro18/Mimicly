@@ -13,11 +13,12 @@ def patched_load(*args, **kwargs):
 torch.load = patched_load
 
 # --- CONFIGURATIONS ---
-audio_path = r"D:\pro\assets\output.wav"  # ✅ full path
-image_path = r"D:\pro\assets\adi2.png"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+audio_path = os.path.join(base_dir, "assets", "output.wav")
+image_path = os.path.join(base_dir, "assets", "adi2.png")
 text_input = "नमस्ते, यह एक डेमो है।"
 language = "hi"
-voice_sample_path = r"D:\pro\assets\adivo.wav"
+voice_sample_path = os.path.join(base_dir, "assets", "adivo.wav")
 
 # --- STEP 1: TTS Generation ---
 tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", gpu=True)
@@ -33,7 +34,7 @@ torch.cuda.empty_cache()
 gc.collect()
 
 # --- STEP 2: SadTalker Execution ---
-os.chdir(r"D:\pro\SadTalker")  # change working dir for SadTalker only
+os.chdir(os.path.join(base_dir, "SadTalker"))  # change working dir for SadTalker only
 run([
     sys.executable, "inference.py",
     "--driven_audio", audio_path,         # ✅ full path

@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, request, jsonify, send_from_directory, Response
 from werkzeug.utils import secure_filename
 from TTS.api import TTS
@@ -241,8 +242,9 @@ def generate_video():
     print(f"tts_audio_path: {tts_audio_path}")
     print(f"photo_path: {photo_path}")
     try:
+        sadtalker_inference = os.path.abspath(os.path.join(os.path.dirname(__file__), 'SadTalker', 'inference.py'))
         subprocess.run([
-            'python', 'D:/sadd/SadTalker/inference.py',
+            sys.executable, sadtalker_inference,
             '--driven_audio', tts_audio_path,
             '--source_image', photo_path,
             '--preprocess', 'full',

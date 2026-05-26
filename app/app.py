@@ -12,6 +12,7 @@ from glob import glob
 import mimetypes
 import time
 import subprocess
+import sys
 
 # === Flask App Setup ===
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -19,7 +20,7 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 UPLOAD_FOLDER = "uploads"
 PHOTO_FOLDER = os.path.join(UPLOAD_FOLDER, 'photos')
 VOICE_FOLDER = os.path.join(UPLOAD_FOLDER, 'voices')
-VIDEO_FOLDER = "D:/pro/SadTalker/uploads/videos"
+VIDEO_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "SadTalker", "uploads", "videos"))
 RESULT_FOLDER = "results"
 DB_PATH = "mimikly.db"
 
@@ -182,8 +183,9 @@ def generate():
     gc.collect()
 
     try:
+        sadtalker_inference = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "SadTalker", "inference.py"))
         result = run([
-            "py", r"D:\pro\SadTalker\inference.py",
+            sys.executable, sadtalker_inference,
             "--driven_audio", tts_audio_path,
             "--source_image", photo_path,
             "--preprocess", "full",
@@ -266,8 +268,9 @@ def generate_pdf():
     gc.collect()
 
     try:
+        sadtalker_inference = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "SadTalker", "inference.py"))
         result = run([
-            "py", r"D:\pro\SadTalker\inference.py",
+            sys.executable, sadtalker_inference,
             "--driven_audio", tts_audio_path,
             "--source_image", photo_path,
             "--preprocess", "full",
