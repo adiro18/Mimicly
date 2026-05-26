@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environments
+xtts_sadtalker_env/
+venv/
+.venv/
+env/
+
+# Databases
+*.db
+mimikly.db
+mimikly.db-journal
+
+# Uploads & Generated files
+uploads/
+results/
+output.wav
+assets/output.wav
+SadTalker/uploads/
+SadTalker/results/
+
+# Large Model Weights and Checkpoints
+*weights/
+*checkpoints/
+*.pth
+*.safetensors
+*.tar
+gfpgan/weights/
+app/gfpgan/weights/
+
+# OS/System files
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+Ehthumbs.db
+Desktop.ini

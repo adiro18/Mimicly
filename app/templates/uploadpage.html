@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mimicly - Upload Content</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 0 30px 40px 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-menu {
+            padding: 30px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #667eea;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            width: 25px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .upload-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .drop-zone {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .drop-zone:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-zone.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+            border-style: solid;
+        }
+
+        .drop-zone-icon {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .drop-zone-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone-subtext {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .file-preview.show {
+            display: block;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .preview-icon {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .preview-info {
+            flex: 1;
+        }
+
+        .preview-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .preview-size {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .remove-btn {
+            background: rgba(255, 107, 107, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 107, 107, 1);
+            transform: scale(1.1);
+        }
+
+        /* Floating elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatRandom 8s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 25%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            right: 15%;
+            animation-delay: 4s;
+        }
+
+        @keyframes floatRandom {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-15px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .upload-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 40px 20px;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .upload-section {
+                padding: 30px 20px;
+            }
+
+            .drop-zone {
+                padding: 30px 15px;
+                min-height: 180px;
+            }
+
+            .drop-zone-icon {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 80px 15px 30px 15px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .upload-section {
+                padding: 25px 15px;
+            }
+
+            .submit-btn {
+                padding: 15px 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Placeholders for uploaded files lists */
+        .uploaded-list-title { color: white; font-weight: 600; margin: 18px 0 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Mimicly</div>
+            </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-item" onclick="navigateToHome()">
+                    <span class="nav-icon">🏠</span>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item active" onclick="navigateToUpload()">
+                    <span class="nav-icon">📤</span>
+                    <span>Upload Content</span>
+                </a>
+                <a href="#" class="nav-item" onclick="navigateToGenerate()">
+                    <span class="nav-icon">🎬</span>
+                    <span>Generate Video</span>
+                </a>
+                <a href="#" class="nav-item" onclick="navigateToGallery()">
+                    <span class="nav-icon">🖼️</span>
+                    <span>Gallery</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1 class="page-title">Upload Your Content</h1>
+                <p class="page-subtitle">Upload your images and audio files to create amazing AI avatars</p>
+            </header>
+
+            <div class="upload-container">
+                <!-- Image Upload Section -->
+                <div class="upload-section">
+                    <h2 class="section-title">📸 Upload Image</h2>
+                    <div class="input-group">
+                        <label class="input-label" for="photoName">Image Name</label>
+                        <input type="text" id="photoName" class="name-input" placeholder="Enter a name for your image">
+                    </div>
+                    <div class="drop-zone" id="photoDropZone" onclick="document.getElementById('photoInput').click()">
+                        <div class="drop-zone-icon">🖼️</div>
+                        <div class="drop-zone-text">Drag & Drop your image here</div>
+                        <div class="drop-zone-subtext">or click to browse</div>
+                        <button class="upload-btn" type="button">Choose Image</button>
+                    </div>
+                    <input type="file" id="photoInput" class="file-input" accept="image/*">
+                    <div class="file-preview" id="photoPreview">
+                        <!-- Preview will be populated by JavaScript -->
+                    </div>
+                    <button class="upload-btn" type="button" onclick="uploadPhoto()" style="margin-top:15px;width:100%;">Upload Image</button>
+                </div>
+
+                <!-- Audio Upload Section -->
+                <div class="upload-section">
+                    <h2 class="section-title">🎵 Upload Audio</h2>
+                    <div class="input-group">
+                        <label class="input-label" for="voiceName">Audio Name</label>
+                        <input type="text" id="voiceName" class="name-input" placeholder="Enter a name for your audio">
+                    </div>
+                    <div class="drop-zone" id="voiceDropZone" onclick="document.getElementById('voiceInput').click()">
+                        <div class="drop-zone-icon">🎵</div>
+                        <div class="drop-zone-text">Drag & Drop your audio here</div>
+                        <div class="drop-zone-subtext">or click to browse</div>
+                        <button class="upload-btn" type="button">Choose Audio</button>
+                    </div>
+                    <input type="file" id="voiceInput" class="file-input" accept="audio/*">
+                    <div class="file-preview" id="voicePreview">
+                        <!-- Preview will be populated by JavaScript -->
+                    </div>
+                    <button class="upload-btn" type="button" onclick="uploadVoice()" style="margin-top:15px;width:100%;">Upload Audio</button>
+                </div>
+            </div>
+            <!-- END upload-container -->
+        </main>
+    </div>
+
+    <script>
+        // Global variables to store uploaded files
+        let uploadedPhoto = null;
+        let uploadedVoice = null;
+
+        // Navigation functions
+        function navigateToHome() {
+            console.log('Navigating to Home');
+            // Replace with actual navigation
+            window.location.href = 'Mimiclymain.html';
+        }
+
+        function navigateToUpload() {
+            console.log('Navigating to Upload Page');
+            window.location.href = 'uploadpage.html';
+        }
+
+        function navigateToGenerate() {
+            console.log('Navigating to Generate Page');
+            window.location.href = 'generate.html';
+        }
+
+        function navigateToGallery() {
+            console.log('Navigating to Gallery Page');
+            window.location.href = 'GALLERY.html';
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-show');
+        }
+
+        // Initialize upload functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload('photo');
+            setupFileUpload('voice');
+            updateSubmitButton();
+        });
+
+        function setupFileUpload(type) {
+            const dropZone = document.getElementById(`${type}DropZone`);
+            const fileInput = document.getElementById(`${type}Input`);
+            const preview = document.getElementById(`${type}Preview`);
+
+            // Drag and drop events
+            dropZone.addEventListener('dragenter', handleDragEnter);
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', (e) => handleDrop(e, type));
+
+            // File input change event
+            fileInput.addEventListener('change', (e) => handleFileSelect(e, type));
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e, type) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0], type);
+            }
+        }
+
+        function handleFileSelect(e, type) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                processFile(files[0], type);
+            }
+        }
+
+        function processFile(file, type) {
+            // Validate file type
+            const isValidType = type === 'photo' ? 
+                file.type.startsWith('image/') : 
+                file.type.startsWith('audio/');
+
+            if (!isValidType) {
+                alert(`Please select a valid ${type === 'photo' ? 'image' : 'audio'} file.`);
+                return;
+            }
+
+            if (type === 'photo') {
+                uploadedPhoto = file;
+                document.getElementById("photoInput").files = createFileList(file); // 👈 Sync file input
+            } else {
+                uploadedVoice = file;
+                document.getElementById("voiceInput").files = createFileList(file); // 👈 Sync file input
+            }
+
+            displayFilePreview(file, type);
+            updateSubmitButton();
+        }
+
+        function displayFilePreview(file, type) {
+            const preview = document.getElementById(`${type}Preview`);
+            const icon = type === 'photo' ? '🖼️' : '🎵';
+            
+            preview.innerHTML = `
+                <div class="preview-item">
+                    <span class="preview-icon">${icon}</span>
+                    <div class="preview-info">
+                        <div class="preview-name">${file.name}</div>
+                        <div class="preview-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFile('${type}')" title="Remove file">×</button>
+                </div>
+            `;
+            
+            preview.classList.add('show');
+        }
+
+        function removeFile(type) {
+            if (type === 'photo') {
+                uploadedPhoto = null;
+                document.getElementById('photoInput').value = '';
+            } else {
+                uploadedVoice = null;
+                document.getElementById('voiceInput').value = '';
+            }
+            
+            const preview = document.getElementById(`${type}Preview`);
+            preview.classList.remove('show');
+            preview.innerHTML = '';
+            
+            updateSubmitButton();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            const hasImage = uploadedPhoto !== null;
+            const hasAudio = uploadedVoice !== null;
+            
+            if (hasImage || hasAudio) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+            }
+        }
+
+        async function uploadPhoto() {
+            const input = document.getElementById("photoInput");
+            const nameInput = document.getElementById("photoName");
+            if (!input.files.length) {
+                alert("Please select an image.");
+                return;
+            }
+            if (!nameInput.value.trim()) {
+                alert("Please enter a name for your image.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("photo", input.files[0]);
+            formData.append("photo_name", nameInput.value.trim());
+            const res = await fetch("/upload/photo", {
+                method: "POST",
+                body: formData
+            });
+            const msg = await res.text();
+            alert(msg);
+            location.reload();
+        }
+
+        async function uploadVoice() {
+            const input = document.getElementById("voiceInput");
+            const nameInput = document.getElementById("voiceName");
+            if (!input.files.length) {
+                alert("Please select an audio file.");
+                return;
+            }
+            if (!nameInput.value.trim()) {
+                alert("Please enter a name for your audio.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("voice", input.files[0]);
+            formData.append("voice_name", nameInput.value.trim());
+            const res = await fetch("/upload/voice", {
+                method: "POST",
+                body: formData
+            });
+            const msg = await res.text();
+            alert(msg);
+            location.reload();
+        }
+
+        async function generateVideo() {
+            const text = document.getElementById("ttsText").value;
+            const photoFilename = document.getElementById("photoInput").files[0].name;
+            const voiceFilename = document.getElementById("voiceInput").files[0].name;
+
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    text,
+                    photo: photoFilename,
+                    voice: voiceFilename
+                })
+            });
+
+            const result = await response.json();
+            if (result.filename) {
+                alert("Video Generated: " + result.filename);
+                window.open("/results/" + result.filename, "_blank");
+            } else {
+                alert("Error: " + result.error);
+            }
+        }
+
+        function createFileList(file) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            return dataTransfer.files;
+        }
+
+        // --- Dynamic Photo & Voice List with Delete Buttons ---
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchAndRenderPhotoList();
+            fetchAndRenderVoiceList();
+        });
+
+        async function fetchAndRenderPhotoList() {
+            const container = document.getElementById('photoListContainer');
+            container.innerHTML = ''; // Clear existing content
+            try {
+                const res = await fetch('/photos');
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    const list = document.createElement('ul');
+                    list.style.listStyle = 'none';
+                    list.style.padding = '0';
+                    data.forEach(filename => {
+                        const li = document.createElement('li');
+                        li.style.display = 'flex';
+                        li.style.alignItems = 'center';
+                        li.style.marginBottom = '10px';
+                        li.innerHTML = `
+                            <span style="color:white;">🖼️ ${filename}</span>
+                            <button style="margin-left:15px;background:#ff6b6b;color:white;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;" onclick="deletePhoto('${filename}')">Delete</button>
+                        `;
+                        list.appendChild(li);
+                    });
+                    container.appendChild(list);
+                } else {
+                    container.innerHTML = '<div style="color:#eee;">No photos uploaded yet.</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="color:#eee;">Failed to load photos.</div>';
+            }
+        }
+
+        async function fetchAndRenderVoiceList() {
+            const container = document.getElementById('voiceListContainer');
+            container.innerHTML = ''; // Clear existing content
+            try {
+                const res = await fetch('/voices');
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    const list = document.createElement('ul');
+                    list.style.listStyle = 'none';
+                    list.style.padding = '0';
+                    data.forEach(filename => {
+                        const li = document.createElement('li');
+                        li.style.display = 'flex';
+                        li.style.alignItems = 'center';
+                        li.style.marginBottom = '10px';
+                        li.innerHTML = `
+                            <span style="color:white;">🎵 ${filename}</span>
+                            <button style="margin-left:15px;background:#ff6b6b;color:white;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;" onclick="deleteVoice('${filename}')">Delete</button>
+                        `;
+                        list.appendChild(li);
+                    });
+                    container.appendChild(list);
+                } else {
+                    container.innerHTML = '<div style="color:#eee;">No voices uploaded yet.</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="color:#eee;">Failed to load voices.</div>';
+            }
+        }
+
+        function deletePhoto(filename) {
+            fetch(`/photos/${filename}`, { method: 'DELETE' })
+              .then(res => res.json())
+              .then(data => {
+                alert(data.message || "Photo deleted");
+                location.reload();
+              });
+        }
+
+        function deleteVoice(filename) {
+            fetch(`/voices/${filename}`, { method: 'DELETE' })
+              .then(res => res.json())
+              .then(data => {
+                alert(data.message || "Voice deleted");
+                location.reload();
+              });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+
+
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.mobile-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggleBtn.contains(e.target) && 
+                sidebar.classList.contains('mobile-show')) {
+                sidebar.classList.remove('mobile-show');
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-show');
+            }
+        });
+    </script>
+</body>
+</html>

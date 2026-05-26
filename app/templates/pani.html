@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mimicly - Generate Video</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 0 30px 40px 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-menu {
+            padding: 30px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #667eea;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            width: 25px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .generate-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .selection-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .selection-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .selection-section:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            min-height: 200px;
+        }
+
+        .content-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-item.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .content-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #667eea;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .content-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .content-name {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 40px 20px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-subtext {
+            font-size: 0.9rem;
+        }
+
+        .selection-preview {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .selection-preview:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .preview-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .preview-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .preview-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .preview-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .preview-name {
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .preview-empty {
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .generate-section {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .generate-btn.generating {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.8); }
+            100% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 25%, #764ba2 50%, #f093fb 75%, #667eea 100%);
+            background-size: 200% 100%;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+            animation: shimmer 1.5s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Floating elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatRandom 8s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 25%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            right: 15%;
+            animation-delay: 4s;
+        }
+
+        @keyframes floatRandom {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-15px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .selection-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .preview-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 40px 20px;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .selection-section {
+                padding: 30px 20px;
+            }
+
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .content-item {
+                min-height: 100px;
+                padding: 10px;
+            }
+
+            .content-icon {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 80px 15px 30px 15px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .selection-section {
+                padding: 25px 15px;
+            }
+
+            .generate-btn {
+                padding: 15px 40px;
+                font-size: 1.1rem;
+            }
+
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+
+        .option-card {
+            display: inline-block;
+            margin: 8px;
+            padding: 10px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            text-align: center;
+            cursor: pointer;
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+        .option-card:hover {
+            background: rgba(102,126,234,0.15);
+            box-shadow: 0 4px 16px rgba(102,126,234,0.15);
+        }
+        .photo-list, .voice-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .selection-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .selection-card {
+            width: 150px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .selection-card:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .selection-card.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 10px #667eea;
+        }
+        .selection-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Mimicly</div>
+            </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-item" onclick="navigateToHome()">
+                    <span class="nav-icon">🏠</span>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item" onclick="navigateToUpload()">
+                    <span class="nav-icon">📤</span>
+                    <span>Upload Content</span>
+                </a>
+                <a href="#" class="nav-item active" onclick="navigateToGenerate()">
+                    <span class="nav-icon">🎬</span>
+                    <span>Generate Video</span>
+                </a>
+                <a href="#" class="nav-item" onclick="navigateToGallery()">
+                    <span class="nav-icon">🖼️</span>
+                    <span>Gallery</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1 class="page-title">Generate AI Video</h1>
+                <p class="page-subtitle">Select your image and audio to create amazing AI avatar videos</p>
+            </header>
+
+            <div class="generate-container">
+                <!-- Selection Sections -->
+                <div class="selection-container">
+                    <!-- Image Selection -->
+                    <div class="selection-section">
+                        <h2 class="section-title">🖼️ Choose Image</h2>
+                        <div id="photoSelection" class="selection-grid"></div>
+                    </div>
+
+                    <!-- Audio Selection -->
+                    <div class="selection-section">
+                        <h2 class="section-title">🎵 Choose Voice</h2>
+                        <div id="voiceSelection" class="selection-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Selection Preview -->
+                <div class="selection-preview">
+                    <h3 class="preview-title">Your Selection</h3>
+                    <div class="preview-content">
+                        <div class="preview-item">
+                            <div class="preview-label">Selected Image</div>
+                            <div class="preview-display" id="selectedImagePreview">
+                                <div class="preview-icon">📸</div>
+                                <div class="preview-name preview-empty">No image selected</div>
+                            </div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Selected Audio</div>
+                            <div class="preview-display" id="selectedAudioPreview">
+                                <div class="preview-icon">🎵</div>
+                                <div class="preview-name preview-empty">No audio selected</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text to Speech Section (moved below selection preview) -->
+                <div class="selection-section" style="max-width:700px;margin:0 auto 40px auto;width:100%;">
+                    <h2 class="section-title">
+                        <span>🗣️</span>
+                        <span>Text to Speech</span>
+                    </h2>
+                    <textarea id="ttsInput" placeholder="Type what you want the image to say..." style="width:100%;min-height:80px;border-radius:10px;padding:12px;font-size:1rem;margin-bottom:12px;"></textarea>
+                    <button onclick="previewTTS()" style="background:linear-gradient(45deg,#667eea,#764ba2);color:white;border:none;padding:10px 24px;border-radius:20px;font-weight:600;cursor:pointer;">Preview Speech</button>
+                    <button onclick="selectTTSAsAudio()" style="background:linear-gradient(45deg,#764ba2,#667eea);color:white;border:none;padding:10px 24px;border-radius:20px;font-weight:600;cursor:pointer;margin-left:10px;">Use as Audio</button>
+                    <div id="ttsStatus" style="margin-top:8px;font-size:0.95em;color:#fff;opacity:0.7;"></div>
+                </div>
+
+                <!-- Generate Section -->
+                <div class="generate-section">
+                    <button class="generate-btn" id="generateBtn" onclick="generateVideo()">
+                        Generate Video
+                    </button>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedImage = null;
+        let selectedAudio = null;
+        let selectedPhoto = null;
+        let selectedVoice = null;
+        let availableImages = [];
+        let availableAudios = [];
+
+        // Sample data - In real app, this would come from backend/localStorage
+        const sampleImages = [
+            { id: 1, name: 'Profile Photo', type: 'image', file: 'profile.jpg' },
+            { id: 2, name: 'Selfie', type: 'image', file: 'selfie.jpg' },
+            { id: 3, name: 'Portrait', type: 'image', file: 'portrait.jpg' },
+            { id: 4, name: 'Avatar Base', type: 'image', file: 'avatar.jpg' }
+        ];
+
+        const sampleAudios = [
+            { id: 1, name: 'Voice Sample 1', type: 'audio', file: 'voice1.mp3' },
+            { id: 2, name: 'Greeting Audio', type: 'audio', file: 'greeting.mp3' },
+            { id: 3, name: 'Introduction', type: 'audio', file: 'intro.mp3' }
+        ];
+
+        // Navigation functions
+        function navigateToHome() {
+            console.log('Navigating to Home');
+            window.location.href = 'Mimiclymain.html';
+        }
+
+        function navigateToUpload() {
+            console.log('Navigating to Upload Page');
+            window.location.href = 'uploadpage.html';
+        }
+
+        function navigateToGenerate() {
+            console.log('Navigating to Generate Page');
+            window.location.href = 'generate.html';
+        }
+
+        function navigateToGallery() {
+            console.log('Navigating to Gallery Page');
+            window.location.href = 'GALLERY.html';
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-show');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAvailableContent();
+            updateGenerateButton();
+        });
+
+        function loadAvailableContent() {
+            // In a real app, you would fetch this from your backend or localStorage
+            // For demo purposes, we'll use sample data
+            availableImages = sampleImages;
+            availableAudios = sampleAudios;
+
+            populateImageGrid();
+            populateAudioGrid();
+        }
+
+        function populateImageGrid() {
+            const imageGrid = document.getElementById('photoSelection');
+
+            if (!imageGrid) {
+                console.error("photoSelection element not found.");
+                return;
+            }
+
+            if (availableImages.length === 0) {
+                imageGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📷</div>
+                        <div class="empty-text">No images uploaded yet</div>
+                        <div class="empty-subtext">Go to Upload page to add images</div>
+                    </div>
+                `;
+                return;
+            }
+
+            imageGrid.innerHTML = availableImages.map(image => `
+                <div class="content-item" onclick="selectImage(${image.id})" data-id="${image.id}">
+                    <div class="content-icon">📸</div>
+                    <div class="content-name">${image.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function populateAudioGrid() {
+            const audioGrid = document.getElementById('voiceSelection');
+
+            if (!audioGrid) {
+                console.error("voiceSelection element not found.");
+                return;
+            }
+
+            if (availableAudios.length === 0) {
+                audioGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <div class="empty-text">No audio files uploaded yet</div>
+                        <div class="empty-subtext">Go to Upload page to add audio</div>
+                    </div>
+                `;
+                return;
+            }
+
+            audioGrid.innerHTML = availableAudios.map(audio => `
+                <div class="content-item" onclick="selectAudio(${audio.id})" data-id="${audio.id}">
+                    <div class="content-icon">🎵</div>
+                    <div class="content-name">${audio.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectImage(imageId) {
+            // Remove previous selection
+            document.querySelectorAll('#imageGrid .content-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Add selection to clicked item
+            const selectedItem = document.querySelector(`#imageGrid .content-item[data-id="${imageId}"]`);
+            selectedItem.classList.add('selected');
+
+            // Store selection
+            selectedImage = availableImages.find(img => img.id === imageId);
+            
+            // Update preview
+            updateImagePreview();
+            updateGenerateButton();
+        }
+
+        function selectAudio(audioId) {
+            // Remove previous selection
+            document.querySelectorAll('#audioGrid .content-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Add selection to clicked item
+            const selectedItem = document.querySelector(`#audioGrid .content-item[data-id="${audioId}"]`);
+            selectedItem.classList.add('selected');
+
+            // Store selection
+            selectedAudio = availableAudios.find(audio => audio.id === audioId);
+            
+            // Update preview
+            updateAudioPreview();
+            updateGenerateButton();
+        }
+
+        function selectPhoto(filename, name) {
+            selectedPhoto = filename;
+            document.querySelectorAll("#photoSelection .selection-card").forEach(c => c.classList.remove("selected"));
+            const selected = [...document.querySelectorAll("#photoSelection .selection-card")]
+                .find(card => card.innerText.trim() === name.trim());
+            if (selected) selected.classList.add("selected");
+
+            // Show preview
+            document.getElementById("selectedImagePreview").innerHTML = `
+                <div class="preview-icon">📸</div>
+                <div class="preview-name">${name}</div>
+            `;
+
+            updateGenerateButton();
+        }
+
+        function selectVoice(filename, name) {
+            selectedVoice = filename;
+            document.querySelectorAll("#voiceSelection .selection-card").forEach(c => c.classList.remove("selected"));
+            const selected = [...document.querySelectorAll("#voiceSelection .selection-card")]
+                .find(card => card.innerText.trim().includes(name.trim()));
+            if (selected) selected.classList.add("selected");
+
+            // Show preview
+            document.getElementById("selectedAudioPreview").innerHTML = `
+                <div class="preview-icon">🎵</div>
+                <div class="preview-name">${name}</div>
+            `;
+
+            updateGenerateButton();
+        }
+
+        function updateImagePreview() {
+            const preview = document.getElementById('selectedImagePreview');
+            if (selectedImage) {
+                preview.innerHTML = `
+                    <div class="preview-icon">📸</div>
+                    <div class="preview-name">${selectedImage.name}</div>
+                `;
+            } else {
+                preview.innerHTML = `
+                    <div class="preview-icon">📸</div>
+                    <div class="preview-name preview-empty">No image selected</div>
+                `;
+            }
+        }
+
+        function updateAudioPreview() {
+            const preview = document.getElementById('selectedAudioPreview');
+            if (selectedAudio) {
+                preview.innerHTML = `
+                    <div class="preview-icon">🎵</div>
+                    <div class="preview-name">${selectedAudio.name}</div>
+                `;
+            } else {
+                preview.innerHTML = `
+                    <div class="preview-icon">🎵</div>
+                    <div class="preview-name preview-empty">No audio selected</div>
+                `;
+            }
+        }
+
+        function updateGenerateButton() {
+            const btn = document.getElementById("generateBtn");
+            const text = document.getElementById("ttsInput")?.value.trim();
+            const canGenerate = selectedPhoto && selectedVoice && text;
+            btn.disabled = !canGenerate;
+            btn.style.opacity = canGenerate ? "1" : "0.6";
+            btn.style.cursor = canGenerate ? "pointer" : "not-allowed";
+        }
+
+        function showProgressBar() {
+            const bar = document.getElementById('progressBar');
+            const fill = document.getElementById('progressFill');
+            bar.style.display = 'block';
+            fill.style.width = '0%';
+            setTimeout(() => { fill.style.width = '80%'; }, 100); // Animate to 80% quickly
+        }
+
+        function hideProgressBar() {
+            const bar = document.getElementById('progressBar');
+            const fill = document.getElementById('progressFill');
+            fill.style.width = '100%';
+            setTimeout(() => {
+                bar.style.display = 'none';
+                fill.style.width = '0%';
+            }, 400); // Let shimmer finish
+        }
+
+        function generateVideo() {
+            const text = document.getElementById("ttsInput").value.trim();
+            if (!selectedPhoto || !selectedVoice || !text) {
+                alert('Please select photo, voice, and enter text.');
+                return;
+            }
+
+            showProgressBar();
+            document.getElementById("generateBtn").disabled = true;
+
+            // Call the backend with selected data
+            fetch("/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    photo: selectedPhoto,
+                    voice: selectedVoice,
+                    text: selectedAudio?.ttsText || text
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                hideProgressBar();
+                document.getElementById("generateBtn").disabled = false;
+                if (result.filename) {
+                    alert("Video Generated: " + result.filename);
+                    window.open("/uploads/videos/" + result.filename, "_blank");
+                } else {
+                    alert("Error: " + result.error);
+                }
+            })
+            .catch(err => {
+                hideProgressBar();
+                document.getElementById("generateBtn").disabled = false;
+                alert("Error: " + err);
+            });
+        }
+
+        function resetSelections() {
+            // Clear selections
+            selectedImage = null;
+            selectedAudio = null;
+
+            // Remove visual selections
+            document.querySelectorAll('.content-item.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Update previews
+            updateImagePreview();
+            updateAudioPreview();
+            updateGenerateButton();
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.mobile-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggleBtn.contains(e.target) && 
+                sidebar.classList.contains('mobile-show')) {
+                sidebar.classList.remove('mobile-show');
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-show');
+            }
+        });
+
+        function previewTTS() {
+            const text = document.getElementById('ttsInput').value.trim();
+            const status = document.getElementById('ttsStatus');
+            if (!text) {
+                status.textContent = 'Please enter text to preview.';
+                return;
+            }
+            status.textContent = 'Playing...';
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.onend = () => { status.textContent = 'Preview finished.'; };
+            utter.onerror = () => { status.textContent = 'Error playing speech.'; };
+            window.speechSynthesis.speak(utter);
+        }
+
+        function selectTTSAsAudio() {
+            const text = document.getElementById('ttsInput').value.trim();
+            const status = document.getElementById('ttsStatus');
+            if (!text) {
+                status.textContent = 'Please enter text to use as audio.';
+                return;
+            }
+            // Simulate selection as an audio object
+            selectedAudio = { id: 'tts', name: 'Text to Speech', type: 'audio', file: null, ttsText: text };
+            // Remove previous selection highlight
+            document.querySelectorAll('#audioGrid .content-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            updateAudioPreview();
+            updateGenerateButton();
+            status.textContent = 'Text to Speech selected as audio.';
+        }
+
+        async function loadPhotos() {
+            const response = await fetch("/photos");
+            const photos = await response.json();
+            const container = document.getElementById("photoSelection");
+            if (container) {
+                container.innerHTML = '';
+                photos.forEach(photo => {
+                    const div = document.createElement("div");
+                    div.className = "selection-card";
+                    div.innerHTML = `
+                        <img src="/view/photo/${photo.filename}" alt="${photo.name}">
+                        <div>${photo.name}</div>
+                    `;
+                    div.onclick = () => selectPhoto(photo.filename, photo.name);
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        async function loadVoices() {
+            const response = await fetch("/voices");
+            const voices = await response.json();
+            const container = document.getElementById("voiceSelection");
+            if (container) {
+                container.innerHTML = '';
+                voices.forEach(voice => {
+                    const div = document.createElement("div");
+                    div.className = "selection-card";
+                    div.innerHTML = `
+                        <div style="font-size:30px;">🎵</div>
+                        <div>${voice.name}</div>
+                    `;
+                    const audio = document.createElement("audio");
+                    audio.controls = true;
+                    audio.src = `/play/voice/${voice.filename}`;
+                    audio.style.width = "100%";
+                    audio.style.marginTop = "10px";
+                    div.appendChild(audio);
+                    div.onclick = () => selectVoice(voice.filename, voice.name);
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        document.getElementById("ttsInput").addEventListener("input", updateGenerateButton);
+
+        window.onload = () => {
+            loadPhotos();
+            loadVoices();
+            updateImagePreview();
+            updateAudioPreview();
+        };
+    </script>
+</body>
+</html>

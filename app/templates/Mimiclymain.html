@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mimicly - AI Avatar Creation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 80px 0 40px 0;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            margin: 20px;
+            z-index: -1;
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e7ff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3); }
+            100% { text-shadow: 0 8px 30px rgba(255, 255, 255, 0.5); }
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-illustration {
+            position: absolute;
+            top: -50px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .main-section {
+            padding: 60px 0;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .card-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .card-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatRandom 8s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes floatRandom {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-15px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        .ai-illustration {
+            position: absolute;
+            top: 10%;
+            right: 5%;
+            width: 200px;
+            height: 200px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .ai-brain {
+            width: 100%;
+            height: 100%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            position: relative;
+            animation: brainPulse 4s ease-in-out infinite;
+        }
+
+        .ai-brain::before,
+        .ai-brain::after {
+            content: '';
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+        .ai-brain::before {
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+        }
+
+        .ai-brain::after {
+            width: 40%;
+            height: 40%;
+            top: 30%;
+            left: 30%;
+        }
+
+        @keyframes brainPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 60px 0 30px 0;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 0 10px;
+            }
+
+            .card {
+                padding: 30px 20px;
+                min-height: 250px;
+            }
+
+            .hero-illustration,
+            .ai-illustration {
+                display: none;
+            }
+
+            .main-section {
+                padding: 40px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .card {
+                padding: 25px 15px;
+            }
+
+            .card-icon {
+                font-size: 3rem;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @keyframes mimiclyFadeIn {
+            to { opacity: 1; }
+        }
+        /* Loader SVG orbit animation */
+        @keyframes orbit {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #mimicly-loader-svg {
+            display: block;
+        }
+        #mimicly-loader-orbit {
+            display: none;
+        }
+        #mimicly-loader-dot {
+            transform-origin: 60px 60px;
+            animation: orbit 1.2s linear infinite;
+        }
+        #mimicly-loader-letters {
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            opacity: 0.12;
+            user-select: none;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #fff;
+            border-top: 6px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 4px 24px 0 #764ba244;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Standard, beautiful loader overlay -->
+    <div id="mimicly-loader" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(120deg,#667eea 0%,#764ba2 60%,#f093fb 100%);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:3.7rem;font-weight:700;letter-spacing:0.18em;background:linear-gradient(90deg,#fff,#e0e7ff,#c7d2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeInUp 1s cubic-bezier(0.4,0,0.2,1) forwards;opacity:0;">Mimicly</div>
+            <div class="loader-spinner" style="margin-top:38px;"></div>
+            <div style="margin-top:22px;font-size:1.1em;color:#fff;opacity:0.7;letter-spacing:0.08em;animation:fadeInUp 1.2s 0.5s cubic-bezier(0.4,0,0.2,1) forwards;opacity:0;">Loading your experience...</div>
+        </div>
+    </div>
+
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="ai-illustration">
+        <div class="ai-brain"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="hero-illustration">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:rgba(255,255,255,0.3);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:rgba(255,255,255,0.1);stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="100" cy="100" r="80" fill="url(#grad1)" />
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+                    <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                </svg>
+            </div>
+            
+            <h1 class="main-title">Welcome to Mimicly</h1>
+            <p class="subtitle" style="font-size:0.98em;">
+                Create your own personalized AI avatars with Mimicly.<br>
+                Upload your photos and voice to generate unique, lifelike digital versions of yourself.
+            </p>
+        </header>
+
+        <main class="main-section">
+            <div class="cards-container">
+                <div class="card" onclick="navigateToUpload()">
+                    <div class="card-icon">📸</div>
+                    <h3 class="card-title">Upload Photos</h3>
+                    <p class="card-description">Upload your photos and audio files to get started with your AI avatar creation journey.</p>
+                    
+                    <button class="card-button" onclick="navigateToUpload()">Get Started</button>
+                </div>
+
+                <div class="card" onclick="navigateToGenerate()">
+                    <div class="card-icon">🤖</div>
+                    <h3 class="card-title">Generate Avatar</h3>
+                    <p class="card-description">Select from your uploaded content and let our AI create stunning personalized avatars.</p>
+                    <button class="card-button">Create Now</button>
+                </div>
+
+                <div class="card" onclick="navigateToGallery()">
+                    <div class="card-icon">🎬</div>
+                    <h3 class="card-title">Gallery</h3>
+                    <p class="card-description">Browse and manage all your generated avatar videos in one beautiful gallery.</p>
+                    <button class="card-button">View Gallery</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer style="width:100%;background:rgba(255,255,255,0.13);backdrop-filter:blur(8px);margin-top:60px;padding:32px 0 18px 0;text-align:center;border-radius:30px 30px 0 0;box-shadow:0 -2px 16px rgba(102,126,234,0.08);color:#fff;letter-spacing:0.03em;">
+        <div style="font-size:1.2em;font-weight:600;margin-bottom:8px;">Contact Us</div>
+        <div style="margin-bottom:6px;">Phone: <a href="tel:8136861208" style="color:#fff;text-decoration:underline;">8136861208</a></div>
+        <div style="margin-bottom:6px;">Email: <a href="mailto:mimiclygj@gmail.com" style="color:#fff;text-decoration:underline;">mimiclygj@gmail.com</a></div>
+        <div style="margin-bottom:6px;">Place: GJ Global Cyberpark, Kozhikode 613426</div>
+        <div style="margin-top:10px;font-size:1em;">Created by <span style="font-weight:600;">Team Mimicly</span></div>
+    </footer>
+
+    <script>
+        // Navigation functions
+        function navigateToUpload() {
+            console.log('Navigating to Upload Page');
+            window.location.href = 'uploadpage.html';
+        }
+
+        function navigateToGenerate() {
+            console.log('Navigating to Generate Page');
+            window.location.href = 'generate.html';
+        }
+
+        function navigateToGallery() {
+            console.log('Navigating to Gallery Page');
+            window.location.href = 'GALLERY.html';
+        }
+
+        // Animate the loader dot in a circular orbit
+        document.addEventListener('DOMContentLoaded', function() {
+            const dot = document.getElementById('mimicly-loader-dot');
+            let angle = 0;
+            function animateDot() {
+                angle += 4;
+                if(angle >= 360) angle = 0;
+                const rad = angle * Math.PI / 180;
+                const r = 40;
+                const cx = 60 + r * Math.cos(rad);
+                const cy = 60 + r * Math.sin(rad);
+                dot.setAttribute('cx', cx);
+                dot.setAttribute('cy', cy);
+                requestAnimationFrame(animateDot);
+            }
+            animateDot();
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            // Loader animation
+            setTimeout(function() {
+                const loader = document.getElementById('mimicly-loader');
+                if(loader) {
+                    loader.style.transition = 'opacity 0.6s cubic-bezier(0.4,0,0.2,1)';
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.remove(), 700);
+                }
+            }, 3000); // Show loader for 3 seconds
+        });
+
+        // Add smooth scrolling and interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add entrance animations
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200 + 500);
+            });
+
+            // Add parallax effect to floating elements
+            window.addEventListener('mousemove', (e) => {
+                const floatingElements = document.querySelectorAll('.floating-element');
+                const mouseX = e.clientX / window.innerWidth;
+                const mouseY = e.clientY / window.innerHeight;
+
+                floatingElements.forEach((element, index) => {
+                    const speed = (index + 1) * 0.05;
+                    const x = (mouseX - 0.5) * speed * 100;
+                    const y = (mouseY - 0.5) * speed * 100;
+                    
+                    element.style.transform = `translate(${x}px, ${y}px)`;
+                });
+            });
+
+            // Add click ripple effect
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    const ripple = document.createElement('div');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s ease-out;
+                        pointer-events: none;
+                        z-index: 10;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Smooth scroll behavior for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+</html>

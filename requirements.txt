@@ -1,0 +1,2 @@
+# Add this to your requirements.txt for PDF support
+PyPDF2
